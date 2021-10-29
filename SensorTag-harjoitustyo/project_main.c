@@ -26,6 +26,7 @@
 #include "sensors/tmp007.h"
 #include "buzzer.h"
 
+
 /* Task */
 #define STACKSIZE 2048
 #define SMALLSTACKSIZE 256              //aanitask k‰ytt‰‰ t‰t‰, 2048 n‰ytti niin isolta pelk‰lle ‰‰nelle
@@ -36,6 +37,9 @@ Char mpuTaskStack[STACKSIZE];
 Char aaniTaskStack[SMALLSTACKSIZE];
 Char analyseDataTaskStack[STACKSIZE];
 
+uint8_t uartBuffer[30];
+char uartStr[125];
+uint8_t jumpCounter = 0;
 // JTKJ: Teht‰v‰ 3. Tilakoneen esittely
 // JTKJ: Exercise 3. Definition of the state machine
 enum state { WAITING=1, DATA_READY,RUOKI,LIIKUNTA,HOIVA,AKTIVOI };
@@ -53,7 +57,9 @@ float gyrox[MAXKOKO]={0};
 float gyroy[MAXKOKO]={0};
 float gyroz[MAXKOKO]={0};
 uint8_t index=0;                        //indeksimuuttuja sliding window
+
 //--------------------------------------------------
+#include "liike.h"
 
 // JTKJ: Teht‰v‰ 1. Lis‰‰ painonappien RTOS-muuttujat ja alustus
 // JTKJ: Exercise 1. Add pins RTOS-variables and configuration here
@@ -144,7 +150,6 @@ void tulosteleMuuttujia(){
     System_flush();
 }
 
-
 /*Onnistuneen tunnistuksen j‰lkeen nollaus, jotta laite ei montaa kertaa tunnista samaa liikett‰.
  *Kun ker‰‰t dataa, ei ehk‰ silloin kannata kutsua t‰t‰.*/
 Void nollaaMuuttujat(){
@@ -176,6 +181,7 @@ int reversedTiltzy(int i) {
   };
   return 0;
 };
+
 int analyseAktivoi(){
     /*tarkasta t‰yttyv‰tkˆ aktivoinnin edellytykset*/
     return 0;
@@ -184,7 +190,34 @@ int analyseHoiva(){
     return 0;
 }
 int analyseLiiku(){
-    return 0;
+    char str[30];
+    uint8_t i;
+    uint32_t time = Clock_getTicks()/10000;
+    //sprintf(str,"%d\n",jumpCounter);
+    //System_printf(str);
+    //System_flush();
+        if (time % 20 == 0){
+            jumpCounter = 0;
+        }
+        for (i = 0; i < 15; i++) {
+
+          if (jump(i)) {
+              jumpCounter++;
+              //sprintf(str,"%d\n",jumpCounter);
+              //System_printf(str);
+              //System_flush();
+              nollaaMuuttujat();
+          }
+        }
+        if (jumpCounter == 2){
+
+            //sprintf(str,"%d\n",jumpCounter);
+            //System_printf(str);
+            //System_flush();
+            jumpCounter = 0;
+            return 1;
+        }
+        return 0;
 }
 /*Tunnistaa vasemmalle kallistuksen, melkeinp‰ suunnitellusti..*/
 int analyseRuoki(){
@@ -218,7 +251,8 @@ void analyseDataFxn(UArg arg0, UArg arg1){
             aaniState=TWOBEEPS;
         }else if (analyseLiiku()){
             programState = LIIKUNTA;
-            aaniState=TWOBEEPS;
+            aaniState=ONEBEEP;
+            nollaaMuuttujat();
         }else if(analyseRuoki()){
             programState=RUOKI;
             aaniState=TWOBEEPS;
@@ -234,6 +268,7 @@ void analyseDataFxn(UArg arg0, UArg arg1){
 void uartFxn(UART_Handle handle, void *rxBuf, size_t len){
 
     //UART_read(handle, rxBuf, 1);
+    UART_read(handle, rxBuf, 1);
 }
 
 /* Task Functions */
@@ -244,8 +279,8 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
     UART_Params_init(&uartParams);
     uartParams.writeDataMode = UART_DATA_TEXT;
     uartParams.readDataMode = UART_DATA_TEXT;
-    uartParams.readMode=UART_MODE_BLOCKING;
-    //uartParams.readCallback = &uartFxn;
+    uartParams.readMode=UART_MODE_CALLBACK;
+    uartParams.readCallback = &uartFxn;
     uartParams.baudRate = 9600; // nopeus 9600baud
     uartParams.dataLength = UART_LEN_8; // 8
     uartParams.parityType = UART_PAR_NONE; // n
@@ -256,10 +291,12 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
         System_abort("Error opening the UART\n");
     }
 
-    // UART_read(uartHandle, uaartBuffer, 1);
+    UART_read(uart, uartBuffer, 1);
     // JTKJ: Teht‰v‰ 4. Lis‰‰ UARTin alustus: 9600,8n1
     // JTKJ: Exercise 4. Setup here UART connection as 9600,8n1
     while (1) {
+
+        UART_write(uart,uartStr, strlen(uartStr));
 
         // JTKJ: Teht‰v‰ 3. Kun tila on oikea, tulosta sensoridata merkkijonossa debug-ikkunaan
         //       Muista tilamuutos
@@ -279,7 +316,9 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
          * */
 
         /*viestin l‰hetys taustaj‰rjestelm‰‰n*/
-
+        //char str[30];
+        //sprintf(str, "koira\n\r");
+        //UART_write(uart,str,strlen(str));
         switch (programState) {
            case RUOKI:
                System_printf("Ruokitaan...kommunikoi taustaj‰rjestelm‰n kanssa\n\r");
@@ -378,10 +417,13 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
         uint32_t time = Clock_getTicks();
         i2cMPU = I2C_open(Board_I2C, &i2cMPUParams);                //mpu (liiketunnistin) v‰yl‰ auki (vain 1kpl v‰yli‰ kerrallaan auki)
         mpu9250_get_data(&i2cMPU, &ax, &ay, &az, &gx, &gy, &gz);    //datan lukeminen
-        sprintf(str,"Sensortask: Aika:%d, (kiihtyvyys x:%.2f, y:%.2f, z:%.2f), (gyro x:%.2f, y:%.2f, z:%.2f)\n", time/100000,ax,ay,az,gx,gy,(gz));
-        System_printf(str);                                         //debug tulostelut tarvittaessa
+        sprintf(str,"Sensortask: Aika:%d, (kiihtyvyys x:% -.2f, y:% -.2f, z:% -.2f), (gyro x:% -.2f, y:% -.2f, z:% -.2f)\n", time/100000,ax,ay,az,gx,gy,(gz));
+
+
+        //System_printf(str);                                         //debug tulostelut tarvittaessa
         System_flush();
         I2C_close(i2cMPU);                                          //mpu (liiketunnistin) v‰yl‰ kiinni
+        sprintf(uartStr, "%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n\r", time,ax,ay,az,gx,gy,gz);
         accx[index] = ax;                                           //talletetaan data sliding window globaaleihin muuttujiin
         accy[index] = ay;                                           //myˆhemp‰‰ analyysi‰ varten
         accz[index] = az;
@@ -399,8 +441,8 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
         i2c = I2C_open(Board_I2C_TMP, &i2cParams);                  //muiden sensorien v‰yl‰ auki
         temperature = tmp007_get_data(&i2c);                        //datan lukemiset globaaliin muuttujaan
         sprintf(str,"            L‰mpˆtila: %.2f Celsiusta\r", temperature);   //debug tulostelut tarvittaessa
-        System_printf(str);
-        System_flush();
+        //System_printf(str);
+        //System_flush();
 
         //valoluku
         light = opt3001_get_data(&i2c);                             //datan lukemiset globaaliseen muuttujaan, opt3001 ei meinaa ehti‰ kaikkea lukea kun haetaan 5 kertaa per sek
@@ -408,8 +450,8 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
             ambientLight=light;                                     //purkkaratkaisu valomittarin hitauteen, saa parantaa jos keksii miten
         }
         sprintf(str,"%16.2f luxia\r", ambientLight);                //debug tulostelut tarvittaessa
-        System_printf(str);
-        System_flush();
+        //System_printf(str);
+        //System_flush();
         I2C_close(i2c);                                             //datat luettu niin kiinni
 
 
