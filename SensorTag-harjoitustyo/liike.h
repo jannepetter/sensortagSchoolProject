@@ -6,7 +6,7 @@
 //---------------------------------------------------------------------------------
 
 
-#define ZEROTHRESHOLD 0.3               //kynnysarvo 0G:tä nollan tulkitsemiselle kiihtyvyysmittarille. Mitä pienempi sen tarkemmin asennon oltava kohdallaan.
+#define ZEROTHRESHOLD 0.3               //kynnysarvo 0G:tÃ¤ nollan tulkitsemiselle kiihtyvyysmittarille. MitÃ¤ pienempi sen tarkemmin asennon oltava kohdallaan.
 #define SENSITIVEZEROTHRESHOLD 0.4      //herkempi kynnys nollalle -> asento voi olla hieman sallivampi
 
 #define ONEGTHRESHOLD 0.8               //kynnysarvo 1G kiihtyvyydelle
@@ -24,9 +24,23 @@ int oikeallaKyljella(int i);
 int katollaan(int i);
 int sIndx(int i);
 int aktivoi(int i);
+int move(int i);
 
-/*Sliding index. Voit tutkia dataa aloittaen nolla indeksistä.
- *Jos perus indeksi voi mennä taulun ulkopuolelle niin käytä tätä*/
+int move(int i){
+    double xmin = -0.00;
+    double xmax = 0.04;
+    double ymin = -0.02;
+    double ymax = 0.02;
+    double zmin = -1.10;
+    if((accx[i] > xmax || accx[i] < xmin) && (accy[i] > ymax || accy[i] < ymin) && 
+        (accz[i]>=zmin)){
+        return 1;
+    }
+    return 0;
+}
+
+/*Sliding index. Voit tutkia dataa aloittaen nolla indeksistÃ¤.
+ *Jos perus indeksi voi mennÃ¤ taulun ulkopuolelle niin kÃ¤ytÃ¤ tÃ¤tÃ¤*/
 int sIndx(int i) { return i % MAXKOKO; };
 
 int aktivoi(int i){
@@ -62,14 +76,14 @@ int jump(int i){
 //
 //        return 1;
 //    }
-    //vähän muokkasin ja herkistelin tätä hyppyfunktiota
+    //vÃ¤hÃ¤n muokkasin ja herkistelin tÃ¤tÃ¤ hyppyfunktiota
     if (liftZ2(i) && preserveXY2(i)){
            return 1;
        }
 
     return 0;
 }
-//kiihtyvyys poikkeaa -1G:stä (maan vetovoima) mutta ei kuitenkaan ole positiivinen (esim. katollaan)
+//kiihtyvyys poikkeaa -1G:stÃ¤ (maan vetovoima) mutta ei kuitenkaan ole positiivinen (esim. katollaan)
 int liftZ2(int i){
     if (accz[i] > -ONEGTHRESHOLD && accz[i] < 0 || accz[i] < -1.2){return 1;}
     return 0;
