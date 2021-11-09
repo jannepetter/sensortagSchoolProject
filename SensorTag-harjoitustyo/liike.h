@@ -31,7 +31,7 @@ int aktivoi(int i);
 int move(int i);
 
 int move(int i){
-    if((accx[i] > XMAX || accx[i] < XMIN) && (accy[i] > YMAX || accy[i] < -YMAX) && 
+    if((accx[i] > 0.2 || accx[i] < -0.2) && (accy[i] > 0.2 || accy[i] < -0.2) &&
         (accz[i]>=ZMIN)){
         return 1;
     }

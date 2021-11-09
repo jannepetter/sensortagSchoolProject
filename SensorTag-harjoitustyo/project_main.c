@@ -109,18 +109,23 @@ static const I2CCC26XX_I2CPinCfg i2cMPUCfg = {
 
 void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
       //ledi p√§√§lle/pois
-//    uint_t pinValue = PIN_getOutputValue( Board_LED0 );
-//    pinValue = !pinValue;
-//    PIN_setOutputValue( ledHandle, Board_LED0, pinValue );
-    if(aaniState==SILENCE){
+    //uint_t pinValue = PIN_getOutputValue( Board_LED0 );
+    //pinValue = !pinValue;
+    //PIN_setOutputValue( ledHandle, Board_LED0, pinValue );
+    /*if(aaniState==SILENCE){
     aaniState=MUSIC;                  //t√§ss√§ voi olla bugeja, jos menee jumiin nii aanet tiedostossa jossakin suljetaan kiinni olevaa buzzeria/aukaistaan aukiolevaa tmv.
-    }
+    }*/
+    //char payload[16] = "ping";
+    //Send6LoWPAN(IEEE80154_SERVER_ADDR, payload, strlen(payload));
+    // Hox! Radio aina takaisin vastaanottotilaan ao. funktiokutssulla
+    // Hox2! T‰ss‰ ei en‰‰ tarkisteta paluuarvoa.. tarkistus vain alustuksessa.
+    //StartReceive6LoWPAN();
 
       //virtojen katkaisu/p√§√§llelaitto (ei toimi, patterit n√§ytt√§is loppuneen -> johtuisko siit√§?)
-//    Task_sleep(100000 / Clock_tickPeriod);
-//    PIN_close(buttonHandle);
-//    PINCC26XX_setWakeup(buttonWakeConfig);
-//    Power_shutdown(NULL,0);
+    Task_sleep(100000 / Clock_tickPeriod);
+    PIN_close(buttonHandle);
+    PINCC26XX_setWakeup(buttonWakeConfig);
+    Power_shutdown(NULL,0);
 
 }
 void rightButtonFxn(PIN_Handle handle, PIN_Id pinId) {
@@ -168,10 +173,10 @@ int analyseHoiva(){
 int analyseLeiki(){
     uint8_t i;
     uint8_t u=0;
-    uint32_t time = Clock_getTicks()/10000;
+    //uint32_t time = Clock_getTicks()/10000;
     for (i=0; i<15; i++){
         u+=move(i);
-        if (u>=10){
+        if (u>=4){
             //System_printf("inside if\n");
             //System_flush();
             return 1;
@@ -281,10 +286,29 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
     }
 
     UART_read(uart, uartBuffer, 1);
+
+       char payload[16]; // viestipuskuri
+       uint16_t senderAddr;
+
+       // Radio alustetaan vastaanottotilaan
+       int32_t result = StartReceive6LoWPAN();
+       if(result != true) {
+          System_abort("Wireless receive start failed");
+       }
     // JTKJ: Teht√§v√§ 4. Lis√§√§ UARTin alustus: 9600,8n1
     // JTKJ: Exercise 4. Setup here UART connection as 9600,8n1
     while (1) {
 
+        if (GetRXFlag()) {
+
+                   // Tyhjennet‰‰n puskuri (ettei sinne j‰‰nyt edellisen viestin j‰mi‰)
+            memset(payload,0,16);
+            // Luetaan viesti puskuriin payload
+            Receive6LoWPAN(&senderAddr, payload, 16);
+            // Tulostetaan vastaanotettu viesti konsoli-ikkunaan
+            System_printf(payload);
+            System_flush();
+        }
 //        UART_write(uart,uartStr, strlen(uartStr));
 
         // JTKJ: Teht√§v√§ 3. Kun tila on oikea, tulosta sensoridata merkkijonossa debug-ikkunaan
@@ -344,6 +368,8 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
 }
 
 Void sensorTaskFxn(UArg arg0, UArg arg1) {
+
+    PIN_setOutputValue( ledHandle, Board_LED0, 1 );
 
     I2C_Handle      i2c;            //muiden sensorien v√§yl√§
     I2C_Params      i2cParams;      //muiden sensorien v√§yl√§
@@ -476,6 +502,8 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
 
 Int main(void) {
 
+
+
     // Task variables
     Task_Handle sensorTaskHandle;
     Task_Params sensorTaskParams;
@@ -547,7 +575,7 @@ Int main(void) {
     Task_Params_init(&uartTaskParams);
     uartTaskParams.stackSize = STACKSIZE;
     uartTaskParams.stack = &uartTaskStack;
-    uartTaskParams.priority=2;
+    uartTaskParams.priority=1;
     uartTaskHandle = Task_create(uartTaskFxn, &uartTaskParams, NULL);
     if (uartTaskHandle == NULL) {
         System_abort("Task create failed!");
