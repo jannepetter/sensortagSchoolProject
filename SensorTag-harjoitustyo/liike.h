@@ -25,16 +25,12 @@ int oikeallaKyljella(int i);
 int katollaan(int i);
 int sIndx(int i);
 int aktivoi(int i);
-int xmove(int i);
+int xmoveu(int i);
+int xmoved(int i);
 int ymove(int i);
 
-<<<<<<< HEAD
-int move(int i){
-    if((accx[i] > 0.2 || accx[i] < -0.2) && (accy[i] > 0.2 || accy[i] < -0.2) &&
-        (accz[i]>=ZMIN)){
-=======
-int xmove(int i){
-    if((accx[i] > MAX || accx[i] < -MAX)){
+int xmoveu(int i){
+    if(accx[i] > MAX ){
         return 1;
     }
     return 0;
@@ -42,7 +38,13 @@ int xmove(int i){
 
 int ymove(int i){
     if((accy[i] > MAX || accy[i] < -MAX)){
->>>>>>> b0268c67445e935525c308a1be455b69c1f290a7
+        return 1;
+    }
+    return 0;
+}
+
+int xmoved(int i){
+    if(accx[i] < -MAX){
         return 1;
     }
     return 0;
