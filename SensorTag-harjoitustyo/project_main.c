@@ -167,11 +167,13 @@ int analyseHoiva(){
 }
 int analyseLeiki(){
     uint8_t i;
-    uint8_t u=0;
+    uint8_t x=0;
+    uint8_t y=0;
     uint32_t time = Clock_getTicks()/10000;
     for (i=0; i<15; i++){
-        u+=move(i);
-        if (u>=10){
+        y+=ymove(i);
+        x+=xmove(i);
+        if (x>1 && y>1){
             //System_printf("inside if\n");
             //System_flush();
             return 1;
