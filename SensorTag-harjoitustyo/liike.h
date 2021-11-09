@@ -11,10 +11,7 @@
 
 #define ONEGTHRESHOLD 0.8               //kynnysarvo 1G kiihtyvyydelle
 #define SENSITIVEGTHRESHOLD 0.65         //herkempi kynnys esim. yhdistettyyn liikkeeseen -> sallivampi asento
-#define XMIN 0.00
-#define XMAX 0.04
-#define YMAX 0.02
-#define ZMIN -1.10
+#define MAX 0.2
 
 int liftZ(int i);
 int liftZ2(int i);
@@ -28,11 +25,24 @@ int oikeallaKyljella(int i);
 int katollaan(int i);
 int sIndx(int i);
 int aktivoi(int i);
-int move(int i);
+int xmove(int i);
+int ymove(int i);
 
+<<<<<<< HEAD
 int move(int i){
     if((accx[i] > 0.2 || accx[i] < -0.2) && (accy[i] > 0.2 || accy[i] < -0.2) &&
         (accz[i]>=ZMIN)){
+=======
+int xmove(int i){
+    if((accx[i] > MAX || accx[i] < -MAX)){
+        return 1;
+    }
+    return 0;
+}
+
+int ymove(int i){
+    if((accy[i] > MAX || accy[i] < -MAX)){
+>>>>>>> b0268c67445e935525c308a1be455b69c1f290a7
         return 1;
     }
     return 0;
