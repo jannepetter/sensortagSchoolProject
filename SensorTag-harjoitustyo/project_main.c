@@ -29,8 +29,8 @@
 
 /* Task */
 #define STACKSIZE 2048
-#define SMALLSTACKSIZE 512              //aanitask käyttää tätä, 2048 näytti niin isolta pelkälle äänelle
-#define MAXKOKO 15                      //sliding window muuttujille, jos otetaan dataa 5 kertaa 3 sekuntia =15, tällä voisi luultavasti max 2sekunnin pituisia liikkeitä määritellä
+#define SMALLSTACKSIZE 512              //aanitask kÃ¤yttÃ¤Ã¤ tÃ¤tÃ¤, 2048 nÃ¤ytti niin isolta pelkÃ¤lle Ã¤Ã¤nelle
+#define MAXKOKO 15                      //sliding window muuttujille, jos otetaan dataa 5 kertaa 3 sekuntia =15, tÃ¤llÃ¤ voisi luultavasti max 2sekunnin pituisia liikkeitÃ¤ mÃ¤Ã¤ritellÃ¤
 
 Char sensorTaskStack[STACKSIZE];
 Char uartTaskStack[STACKSIZE];
@@ -41,9 +41,9 @@ Char analyseDataTaskStack[STACKSIZE];
 uint8_t uartBuffer[30];
 char uartStr[125];
 char tulosteluStr[125];
-// JTKJ: Tehtävä 3. Tilakoneen esittely
+// JTKJ: TehtÃ¤vÃ¤ 3. Tilakoneen esittely
 // JTKJ: Exercise 3. Definition of the state machine
-enum state { STOP=0,WAITING, DATA_READY,RUOKI,LIIKUNTA,HOIVA,AKTIVOI,LEIKI }; //STOP -> liikkeentunnistus pois päältä
+enum state { STOP=0,WAITING, DATA_READY,RUOKI,LIIKUNTA,HOIVA,AKTIVOI,LEIKI }; //STOP -> liikkeentunnistus pois pÃ¤Ã¤ltÃ¤
 enum state programState = WAITING;
 
 //----------------globaalit muuttujat---------------
@@ -62,12 +62,12 @@ uint8_t index=0;                        //indeksimuuttuja sliding window
 #include "liike.h"
 #include <apufunktiot.h>
 
-// JTKJ: Tehtävä 1. Lisää painonappien RTOS-muuttujat ja alustus
+// JTKJ: TehtÃ¤vÃ¤ 1. LisÃ¤Ã¤ painonappien RTOS-muuttujat ja alustus
 // JTKJ: Exercise 1. Add pins RTOS-variables and configuration here
 static PIN_Handle buttonHandle;             //vasen nappi
 static PIN_State buttonState;
 
-static PIN_Handle rightButtonHandle;        //oikea nappi (katsottuna että johto osoittaa ylös ja katsot monitoria)
+static PIN_Handle rightButtonHandle;        //oikea nappi (katsottuna ettÃ¤ johto osoittaa ylÃ¶s ja katsot monitoria)
 static PIN_State rightButtonState;
 
 static PIN_Handle ledHandle;
@@ -83,21 +83,21 @@ static PIN_Config mpuConfig[] = {
 
 PIN_Config buttonConfig[] = {
    Board_BUTTON0  | PIN_INPUT_EN | PIN_PULLUP | PIN_IRQ_NEGEDGE,
-   PIN_TERMINATE // Asetustaulukko lopetetaan aina tällä vakiolla
+   PIN_TERMINATE // Asetustaulukko lopetetaan aina tÃ¤llÃ¤ vakiolla
 };
-PIN_Config buttonWakeConfig[] = {                                           //vasemmalle napille alustettu virtojen katkaisu/päällelaitto
+PIN_Config buttonWakeConfig[] = {                                           //vasemmalle napille alustettu virtojen katkaisu/pÃ¤Ã¤llelaitto
    Board_BUTTON0  | PIN_INPUT_EN | PIN_PULLUP | PINCC26XX_WAKEUP_NEGEDGE,
-   PIN_TERMINATE // Asetustaulukko lopetetaan aina tällä vakiolla
+   PIN_TERMINATE // Asetustaulukko lopetetaan aina tÃ¤llÃ¤ vakiolla
 };
 
 PIN_Config rightButtonConfig[] = {
    Board_BUTTON1  | PIN_INPUT_EN | PIN_PULLUP | PIN_IRQ_NEGEDGE,
-   PIN_TERMINATE // Asetustaulukko lopetetaan aina tällä vakiolla
+   PIN_TERMINATE // Asetustaulukko lopetetaan aina tÃ¤llÃ¤ vakiolla
 };
 
 PIN_Config ledConfig[] = {
    Board_LED0 | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MAX,
-   PIN_TERMINATE // Asetustaulukko lopetetaan aina tällä vakiolla
+   PIN_TERMINATE // Asetustaulukko lopetetaan aina tÃ¤llÃ¤ vakiolla
 };
 
 // MPU uses its own I2C interface
@@ -108,20 +108,20 @@ static const I2CCC26XX_I2CPinCfg i2cMPUCfg = {
 
 
 void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
-      //ledi päälle/pois
+      //ledi pÃ¤Ã¤lle/pois
     //uint_t pinValue = PIN_getOutputValue( Board_LED0 );
     //pinValue = !pinValue;
     //PIN_setOutputValue( ledHandle, Board_LED0, pinValue );
     /*if(aaniState==SILENCE){
-    aaniState=MUSIC;                  //tässä voi olla bugeja, jos menee jumiin nii aanet tiedostossa jossakin suljetaan kiinni olevaa buzzeria/aukaistaan aukiolevaa tmv.
+    aaniState=MUSIC;                  //tÃ¤ssÃ¤ voi olla bugeja, jos menee jumiin nii aanet tiedostossa jossakin suljetaan kiinni olevaa buzzeria/aukaistaan aukiolevaa tmv.
     }*/
     //char payload[16] = "ping";
     //Send6LoWPAN(IEEE80154_SERVER_ADDR, payload, strlen(payload));
     // Hox! Radio aina takaisin vastaanottotilaan ao. funktiokutssulla
-    // Hox2! T�ss� ei en�� tarkisteta paluuarvoa.. tarkistus vain alustuksessa.
+    // Hox2! Tässä ei enää tarkisteta paluuarvoa.. tarkistus vain alustuksessa.
     //StartReceive6LoWPAN();
 
-      //virtojen katkaisu/päällelaitto (ei toimi, patterit näyttäis loppuneen -> johtuisko siitä?)
+      //virtojen katkaisu/pÃ¤Ã¤llelaitto (ei toimi, patterit nÃ¤yttÃ¤is loppuneen -> johtuisko siitÃ¤?)
     Task_sleep(100000 / Clock_tickPeriod);
     PIN_close(buttonHandle);
     PINCC26XX_setWakeup(buttonWakeConfig);
@@ -130,24 +130,24 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
 }
 void rightButtonFxn(PIN_Handle handle, PIN_Id pinId) {
 
-//    tulosteleMuuttujia();       //datan keräystä liikkeiden analysointiin
-//    nollaaMuuttujat();          //testaus vaiheessa muuttujat nollautuu napilla näppärästi tulostuksen jälkeen
+//    tulosteleMuuttujia();       //datan kerÃ¤ystÃ¤ liikkeiden analysointiin
+//    nollaaMuuttujat();          //testaus vaiheessa muuttujat nollautuu napilla nÃ¤ppÃ¤rÃ¤sti tulostuksen jÃ¤lkeen
 
 
-    //liiketunnistus päälle 1 piippaus /pois päältä 3 piippausta
+    //liiketunnistus pÃ¤Ã¤lle 1 piippaus /pois pÃ¤Ã¤ltÃ¤ 3 piippausta
     if(programState==STOP){
         programState=DATA_READY;
         if(aaniState==SILENCE){
         aaniState=ONEBEEP;
         }
-        System_printf("liiketunnistus päällä \n\r");
+        System_printf("liiketunnistus pÃ¤Ã¤llÃ¤ \n\r");
         System_flush();
     }else{
         programState=STOP;
         if(aaniState==SILENCE){
         aaniState=THREEBEEPS;
         }
-        System_printf("liiketunnistus pysäytetty \n\r");
+        System_printf("liiketunnistus pysÃ¤ytetty \n\r");
         System_flush();
     }
 
@@ -163,7 +163,7 @@ int analyseAktivoi(){
     }
     return 0;
 }
-//lämpimässä ja pimeässä hoivataan
+//lÃ¤mpimÃ¤ssÃ¤ ja pimeÃ¤ssÃ¤ hoivataan
 int analyseHoiva(){
     if(temperature>34 && ambientLight<0.1){
         return 1;
@@ -172,29 +172,21 @@ int analyseHoiva(){
 }
 int analyseLeiki(){
     uint8_t i;
-<<<<<<< HEAD
-    uint8_t u=0;
-    //uint32_t time = Clock_getTicks()/10000;
-    for (i=0; i<15; i++){
-        u+=move(i);
-        if (u>=4){
-=======
-    uint8_t x=0;
+    uint8_t xylos=0;
     uint8_t y=0;
+    uint8_t xalas=0;
     uint32_t time = Clock_getTicks()/10000;
     for (i=0; i<15; i++){
         y+=ymove(i);
-        x+=xmove(i);
-        if (x>1 && y>1){
->>>>>>> b0268c67445e935525c308a1be455b69c1f290a7
-            //System_printf("inside if\n");
-            //System_flush();
+        xylos+=xmoveu(i);
+        xalas+=xmoved(i);
+        if (xylos>0 && xalas>0 && y>1){
             return 1;
         }
     }
     return 0;
 }
-//2-3 hyppyä pöydältä laite asetettuna näyttö ylöspäin
+//2-3 hyppyÃ¤ pÃ¶ydÃ¤ltÃ¤ laite asetettuna nÃ¤yttÃ¶ ylÃ¶spÃ¤in
 int analyseLiiku(){
     uint8_t i;
     uint8_t counter=0;
@@ -203,7 +195,7 @@ int analyseLiiku(){
           if (jump(i)) {
               counter++;
           }
-            if(counter>=3){                 //jos 3 suunnanmuutosta (ylös tai alas) globaaleissa muuttujissa (n. 3s sisällä)
+            if(counter>=3){                 //jos 3 suunnanmuutosta (ylÃ¶s tai alas) globaaleissa muuttujissa (n. 3s sisÃ¤llÃ¤)
                 return 1;                   //palauttaa true jonka seurauksena muuttujat nollautuu analyseTaskissa
             }
         }
@@ -227,8 +219,8 @@ void analyseDataFxn(UArg arg0, UArg arg1){
 
     while (1){
     if (programState == DATA_READY){
-        /*ensin tarkastetaan monimutkaisempaa dataa ja muutetaan tilaa jos ehdot täyttyy
-         *, jos minkään tilan vaatimukset eivät täyty odotellaan uutta dataa (WAITING)*/
+        /*ensin tarkastetaan monimutkaisempaa dataa ja muutetaan tilaa jos ehdot tÃ¤yttyy
+         *, jos minkÃ¤Ã¤n tilan vaatimukset eivÃ¤t tÃ¤yty odotellaan uutta dataa (WAITING)*/
         if(analyseAktivoi()){
             programState = AKTIVOI;
             if(aaniState==SILENCE){
@@ -305,13 +297,13 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
        if(result != true) {
           System_abort("Wireless receive start failed");
        }
-    // JTKJ: Tehtävä 4. Lisää UARTin alustus: 9600,8n1
+    // JTKJ: TehtÃ¤vÃ¤ 4. LisÃ¤Ã¤ UARTin alustus: 9600,8n1
     // JTKJ: Exercise 4. Setup here UART connection as 9600,8n1
     while (1) {
 
         if (GetRXFlag()) {
 
-                   // Tyhjennet��n puskuri (ettei sinne j��nyt edellisen viestin j�mi�)
+                   // Tyhjennetään puskuri (ettei sinne jäänyt edellisen viestin jämiä)
             memset(payload,0,16);
             // Luetaan viesti puskuriin payload
             Receive6LoWPAN(&senderAddr, payload, 16);
@@ -321,7 +313,7 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
         }
 //        UART_write(uart,uartStr, strlen(uartStr));
 
-        // JTKJ: Tehtävä 3. Kun tila on oikea, tulosta sensoridata merkkijonossa debug-ikkunaan
+        // JTKJ: TehtÃ¤vÃ¤ 3. Kun tila on oikea, tulosta sensoridata merkkijonossa debug-ikkunaan
         //       Muista tilamuutos
 //        if (programState == DATA_READY){
 //            char str[20];
@@ -334,42 +326,42 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
 //            programState = WAITING;
 //        }
 
-        /*viestin vastaanotto taustajärjestelmästä (pitäisiköhän tämä hoitaa erillisessä priority 1 taskissa?)
+        /*viestin vastaanotto taustajÃ¤rjestelmÃ¤stÃ¤ (pitÃ¤isikÃ¶hÃ¤n tÃ¤mÃ¤ hoitaa erillisessÃ¤ priority 1 taskissa?)
          * teejotain()
          * */
 
-        /*viestin lähetys taustajärjestelmään*/
+        /*viestin lÃ¤hetys taustajÃ¤rjestelmÃ¤Ã¤n*/
         //char str[30];
         //sprintf(str, "koira\n\r");
         //UART_write(uart,str,strlen(str));
         switch (programState) {
            case RUOKI:
-               System_printf("Ruokitaan...kommunikoi taustajärjestelmän kanssa\n\r");
+               System_printf("Ruokitaan...kommunikoi taustajÃ¤rjestelmÃ¤n kanssa\n\r");
                System_flush();
                programState = WAITING;
                break;
            case LIIKUNTA:
-               System_printf("Liikutaan...Kommunikoi taustajärjestelmän kanssa\n\r");
+               System_printf("Liikutaan...Kommunikoi taustajÃ¤rjestelmÃ¤n kanssa\n\r");
                System_flush();
                programState = WAITING;
                break;
            case HOIVA:
-               System_printf("Hoivataan...Kommunikoi taustajärjestelmän kanssa\n\r");
+               System_printf("Hoivataan...Kommunikoi taustajÃ¤rjestelmÃ¤n kanssa\n\r");
                System_flush();
                programState = WAITING;
                break;
            case AKTIVOI:
-               System_printf("Aktivoidaan...Kommunikoi taustajärjestelmän kanssa\n\r");
+               System_printf("Aktivoidaan...Kommunikoi taustajÃ¤rjestelmÃ¤n kanssa\n\r");
                System_flush();
                programState = WAITING;
                break;
            case LEIKI:
-               System_printf("Leikitään...Kommunikoi taustajärjestelmän kanssa\n\r");
+               System_printf("LeikitÃ¤Ã¤n...Kommunikoi taustajÃ¤rjestelmÃ¤n kanssa\n\r");
                System_flush();
                programState = WAITING;
                break;
            default:
-               //programState oli jotain muuta esim. DATA_READY, ei muuteta mitään
+               //programState oli jotain muuta esim. DATA_READY, ei muuteta mitÃ¤Ã¤n
                break;
            }
 
@@ -381,21 +373,21 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
 
     PIN_setOutputValue( ledHandle, Board_LED0, 1 );
 
-    I2C_Handle      i2c;            //muiden sensorien väylä
-    I2C_Params      i2cParams;      //muiden sensorien väylä
+    I2C_Handle      i2c;            //muiden sensorien vÃ¤ylÃ¤
+    I2C_Params      i2cParams;      //muiden sensorien vÃ¤ylÃ¤
 
-    I2C_Handle i2cMPU;              //mpu väylä
-    I2C_Params i2cMPUParams;        //mpu väylä
+    I2C_Handle i2cMPU;              //mpu vÃ¤ylÃ¤
+    I2C_Params i2cMPUParams;        //mpu vÃ¤ylÃ¤
 
     I2C_Transaction i2cMessage;
 
-    uint8_t sensorCounter=0;        //ei lueta joka tickillä kaikkia sensoreja
+    uint8_t sensorCounter=0;        //ei lueta joka tickillÃ¤ kaikkia sensoreja
 
     I2C_Params_init(&i2cMPUParams);
     i2cMPUParams.bitRate = I2C_400kHz;
     i2cMPUParams.custom = (uintptr_t)&i2cMPUCfg;
 
-    //MPU power on (joku kumma bugi ku ei anna laittaa tätä, toimii silti)
+    //MPU power on (joku kumma bugi ku ei anna laittaa tÃ¤tÃ¤, toimii silti)
 //    Pin_setOutputValue(mpuHandle, Board_MPU_POWER, Board_MPU_POWER_ON);
 
     Task_sleep(100000/Clock_tickPeriod);        //mpu sensor powerup wait
@@ -420,7 +412,7 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
     I2C_Params_init(&i2cParams);
     i2cParams.bitRate = I2C_400kHz;
 
-    //lämpömittari setup ja calibraario
+    //lÃ¤mpÃ¶mittari setup ja calibraario
     i2c = I2C_open(Board_I2C_TMP, &i2cParams);
     if (i2c == NULL) {
       System_abort("Error Initializing I2C\n");
@@ -441,27 +433,27 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
 
 
 
-    double light=-1000;                                             //välimuuttuja,
+    double light=-1000;                                             //vÃ¤limuuttuja,
     while (1) {
         if(programState == WAITING){
         uint32_t time = Clock_getTicks()/10000;
 
 
-        //LÄMPÖSENSORI:n luku n. 3 sekunnin välein
+        //LÃMPÃSENSORI:n luku n. 3 sekunnin vÃ¤lein
         if(sensorCounter%17 == 0){
-        i2c = I2C_open(Board_I2C_TMP, &i2cParams);                  //muiden sensorien väylä auki
+        i2c = I2C_open(Board_I2C_TMP, &i2cParams);                  //muiden sensorien vÃ¤ylÃ¤ auki
         temperature = tmp007_get_data(&i2c);                        //datan lukemiset globaaliin muuttujaan
-//        sprintf(tulosteluStr,"            Lämpötila: %.2f Celsiusta\r", temperature);   //debug tulostelut tarvittaessa
+//        sprintf(tulosteluStr,"            LÃ¤mpÃ¶tila: %.2f Celsiusta\r", temperature);   //debug tulostelut tarvittaessa
 //        System_printf(tulosteluStr);
 //        System_flush();
         I2C_close(i2c);                                             //datat luettu niin kiinni
 
 
 
-        //VALOSENSORI:n luku n. 2 sekunnin välein
+        //VALOSENSORI:n luku n. 2 sekunnin vÃ¤lein
         }else if (sensorCounter%11 == 0){
-        i2c = I2C_open(Board_I2C_TMP, &i2cParams);                  //muiden sensorien väylä auki
-        light = opt3001_get_data(&i2c);                             //datan lukemiset globaaliseen muuttujaan, opt3001 ei meinaa ehtiä kaikkea lukea kun haetaan 5 kertaa per sek
+        i2c = I2C_open(Board_I2C_TMP, &i2cParams);                  //muiden sensorien vÃ¤ylÃ¤ auki
+        light = opt3001_get_data(&i2c);                             //datan lukemiset globaaliseen muuttujaan, opt3001 ei meinaa ehtiÃ¤ kaikkea lukea kun haetaan 5 kertaa per sek
             if (light>=0){
                 ambientLight=light;                                 //purkkaratkaisu valomittarin hitauteen, saa parantaa jos keksii miten
             }
@@ -472,40 +464,40 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
 
 
 
-        //LIIKESENSORI:n luku n. 0,2 sekunnin välein
+        //LIIKESENSORI:n luku n. 0,2 sekunnin vÃ¤lein
         }else{
-        i2cMPU = I2C_open(Board_I2C, &i2cMPUParams);                //mpu (liiketunnistin) väylä auki (vain 1kpl väyliä kerrallaan auki)
+        i2cMPU = I2C_open(Board_I2C, &i2cMPUParams);                //mpu (liiketunnistin) vÃ¤ylÃ¤ auki (vain 1kpl vÃ¤yliÃ¤ kerrallaan auki)
         mpu9250_get_data(&i2cMPU, &accx[index], &accy[index], &accz[index], &gyrox[index], &gyroy[index], &gyroz[index]);    //datan lukeminen
 //        sprintf(tulosteluStr,"Sensortask: Aika:%d, (kiihtyvyys x:% -.2f, y:% -.2f, z:% -.2f), (gyro x:% -.2f, y:% -.2f, z:% -.2f)\n",
 //                time/100000,accx[index], accy[index], accz[index], gyrox[index], gyroy[index], gyroz[index]);
 //        System_printf(tulosteluStr);                                         //debug tulostelut tarvittaessa
 //        System_flush();
-        I2C_close(i2cMPU);                                          //mpu (liiketunnistin) väylä kiinni
+        I2C_close(i2cMPU);                                          //mpu (liiketunnistin) vÃ¤ylÃ¤ kiinni
 //        sprintf(uartStr, "%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n\r", time,accx[index], accy[index], accz[index], gyrox[index], gyroy[index], gyroz[index]);
-            if (index==MAXKOKO-1){                                  //sliding window indeksin päivitys
+            if (index==MAXKOKO-1){                                  //sliding window indeksin pÃ¤ivitys
                 index=0;
             }else{
                 index++;
             }
                                                                         //luetaan liikesensori 3 kertaa ennenkuin annetaan lupa analysoida dataa -> DATA_READY
-            if(sensorCounter%3==0 && programState!=STOP){               //jos liiketunnistuksen keskeytys (oikea nappi) ei ole laitettu päälle niin DATA_READY
-                programState = DATA_READY;                              //DATA_READY vasta kun tarpeeksi uutta liikedataa kerätty
+            if(sensorCounter%3==0 && programState!=STOP){               //jos liiketunnistuksen keskeytys (oikea nappi) ei ole laitettu pÃ¤Ã¤lle niin DATA_READY
+                programState = DATA_READY;                              //DATA_READY vasta kun tarpeeksi uutta liikedataa kerÃ¤tty
                 }
             }
         }
 
 
         sensorCounter++;
-//        sprintf(tulosteluStr,"%i counter, %f lämpö %f valo\r", sensorCounter,temperature,ambientLight);
+//        sprintf(tulosteluStr,"%i counter, %f lÃ¤mpÃ¶ %f valo\r", sensorCounter,temperature,ambientLight);
 //        System_printf(tulosteluStr);
 //        System_flush();
 
-//        uint32_t patteri = HWREG(AON_BATMON_BASE + AON_BATMON_O_BAT); //patterin jännite binaarilukuna (nollaa näyttää)
+//        uint32_t patteri = HWREG(AON_BATMON_BASE + AON_BATMON_O_BAT); //patterin jÃ¤nnite binaarilukuna (nollaa nÃ¤yttÃ¤Ã¤)
 //        sprintf(tulosteluStr,"%f patteri\r", patteri);
 //        System_printf(tulosteluStr);
 //        System_flush();
 
-        Task_sleep(150000 / Clock_tickPeriod);                      //0,15 s  eli datan keräys 6 kertaa sekunnissa
+        Task_sleep(150000 / Clock_tickPeriod);                      //0,15 s  eli datan kerÃ¤ys 6 kertaa sekunnissa
     }
 }
 
@@ -581,7 +573,7 @@ Int main(void) {
         System_abort("Task create failed!");
     }
 
-    //taustajärjestelmän kanssa kommunikointi
+    //taustajÃ¤rjestelmÃ¤n kanssa kommunikointi
     Task_Params_init(&uartTaskParams);
     uartTaskParams.stackSize = STACKSIZE;
     uartTaskParams.stack = &uartTaskStack;
@@ -591,9 +583,9 @@ Int main(void) {
         System_abort("Task create failed!");
     }
 
-    /*Voit kutsua ääniä eri toiminnallisuuksiin muuttamalla aaniStatea halutuksi esim. aaniState=ONEBEEP;
-     *muita äänitiloja SILENCE,ONEBEEP,TWOBEEPS,MUSIC
-     *äänitilat palautuvat automaattisesti takaisin SILENCE:een suorituksen jälkeen*/
+    /*Voit kutsua Ã¤Ã¤niÃ¤ eri toiminnallisuuksiin muuttamalla aaniStatea halutuksi esim. aaniState=ONEBEEP;
+     *muita Ã¤Ã¤nitiloja SILENCE,ONEBEEP,TWOBEEPS,MUSIC
+     *Ã¤Ã¤nitilat palautuvat automaattisesti takaisin SILENCE:een suorituksen jÃ¤lkeen*/
     Task_Params_init(&aaniTaskParams);
     aaniTaskParams.stackSize = SMALLSTACKSIZE;
     aaniTaskParams.stack = &aaniTaskStack;
