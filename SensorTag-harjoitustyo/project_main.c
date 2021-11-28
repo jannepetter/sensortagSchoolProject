@@ -53,10 +53,11 @@ Char analyseDataTaskStack[STACKSIZE];
 uint8_t isHappy=0;      //jos tamagotchi happy -> niin se voi pysya hallussa yhden laiminlyonnin verran
 uint8_t survive=0;      //survive toiminnallisuuden ja viestin triggeri flagi
 uint8_t buffCount=0;    //buffercounter, kun kokonaisen viestin edest� on k�sitelty merkkej� (BLENGTH) -> itse viesti kasitellaan
-uint8_t uartBuffer[BLENGTH]; //itse uart bufferin koko, tama nayttaisi riittavan 16
+uint8_t uartBuffer[16]; //itse uart bufferin koko, tama nayttaisi riittavan 16
 char testi[50];         //testailua varten
 char uartStr[BLENGTH];  //viesti1 taustajarjestelmasta
 char uartStr2[BLENGTH]; //viesti2 - 1 viesti ei aina riita, (niita tulee 1-3 kerralla + mahdolliset muiden viestit)
+char radioBuffer[BLENGTH]; // testi radioviesti vastaanotto
 char tulosteluStr[100];
 
 enum moves {PRIMARY=0,SECONDARY};
@@ -337,7 +338,7 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
 
     UART_read(uart, uartBuffer, 1);
 
-       char payload[16]; // viestipuskuri
+//       char payload[16]; // viestipuskuri
        uint16_t senderAddr;
 
        // Radio alustetaan vastaanottotilaan
@@ -351,12 +352,14 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
         if (GetRXFlag()) {
 
             // Tyhjennetään puskuri (ettei sinne jäänyt edellisen viestin jämiä)
-            memset(payload,0,16);
+            memset(radioBuffer,0,BLENGTH);
             // Luetaan viesti puskuriin payload
-            Receive6LoWPAN(&senderAddr, payload, 16);
+            Receive6LoWPAN(&senderAddr, radioBuffer, BLENGTH);
             // Tulostetaan vastaanotettu viesti konsoli-ikkunaan
-            System_printf(payload);
-            System_flush();
+                sprintf(tulosteluStr,"%s -radio\r\n",radioBuffer);
+                System_printf(tulosteluStr);
+                System_flush();
+                memset(tulosteluStr,0,100);
         }
         //jos tamagotchi on pidetty aiemmin tyytyvaisena ja taustajarjestelma lahettaa viestin etta se on karkaamassa
         // readMsg palauttaa 1 -> survive=True
