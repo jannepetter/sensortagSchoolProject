@@ -4,6 +4,7 @@
 int readMsg();
 int checkMsg();
 int validMsg(char *msg);
+void radioStrs();
 /*data-analyysi muuttujat. Voit esim oikealla napilla kerätä liikeen jälkeen dataa tällä.
  * Kun datat on kerätty ja liiketunnistukset toimii nii tämän funktion vois varmaanki poistaa häirittemästä.*/
 //void tulosteleMuuttujia(){
@@ -78,6 +79,15 @@ int checkMsg(){
             count++;
         }
     }
+//    if(validMsg(radioBuffer)){
+//        if(strstr(radioBuffer,"Too late")){
+//            count+=10;
+//        }else if((strstr(radioBuffer,"Severe") || strstr(radioBuffer,"scratch") || strstr(radioBuffer,"Running low"))){
+//            count+=3;
+//        }else{
+//            count++;
+//        }
+//    }
     if(aaniState==SILENCE){
         if(count>9){
             aaniState=MUSIC;        //tamagotchi karkasi
@@ -91,6 +101,16 @@ int checkMsg(){
         }
     }
     return 0;
+}
+void radioStrs(){
+    uint8_t i;
+    for (i = 0; i < BLENGTH*2; i++) {
+        if(i<BLENGTH){
+            uartStr[i]=radioBuffer[i];
+        }else if (i<BLENGTH*2){
+            uartStr2[i-BLENGTH]=radioBuffer[i];
+        }
+    }
 }
 
 int readMsg(){
@@ -110,7 +130,7 @@ int readMsg(){
     buffCount=0;
     memset(uartStr,0,BLENGTH);
     memset(uartStr2,0,BLENGTH);
-
+    memset(radioBuffer,0,BLENGTH*2);
     memset(tulosteluStr,0,100);
     if(survive){
         return 1;

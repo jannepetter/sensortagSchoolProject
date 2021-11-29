@@ -57,7 +57,7 @@ uint8_t uartBuffer[16]; //itse uart bufferin koko, tama nayttaisi riittavan 16
 char testi[50];         //testailua varten
 char uartStr[BLENGTH];  //viesti1 taustajarjestelmasta
 char uartStr2[BLENGTH]; //viesti2 - 1 viesti ei aina riita, (niita tulee 1-3 kerralla + mahdolliset muiden viestit)
-char radioBuffer[BLENGTH]; // testi radioviesti vastaanotto
+char radioBuffer[160]; // testi radioviesti vastaanotto
 char tulosteluStr[100];
 
 enum moves {PRIMARY=0,SECONDARY};
@@ -193,7 +193,7 @@ int analyseAktivoi(){
 
 //lampimassa ja pimeassa hoivataan
 int analyseHoiva(){
-    if(temperature>34 && ambientLight<0.1){
+    if(temperature>32 && ambientLight<0.1){
         return 1;
     }
     return 0;
@@ -312,7 +312,7 @@ void sendMsg(UART_Handle handle, char *msg,int length){
     if(commState == GATEWAY){                               //viestitys uartilla
         UART_write(handle,msg, length+1);
     }else{
-        Send6LoWPAN(IEEE80154_SERVER_ADDR, (uint8_t*)msg, length+1);  //viestitys radio paalla
+        Send6LoWPAN(IEEE80154_SERVER_ADDR, (uint8_t*)msg, length);  //viestitys radio paalla
         StartReceive6LoWPAN();
     }
 }
@@ -349,17 +349,19 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
 
     while (1) {
 
-        if (GetRXFlag()) {
+        if (commState==RADIO && GetRXFlag()) {
 
             // Tyhjennetään puskuri (ettei sinne jäänyt edellisen viestin jämiä)
-            memset(radioBuffer,0,BLENGTH);
+
             // Luetaan viesti puskuriin payload
             Receive6LoWPAN(&senderAddr, radioBuffer, BLENGTH);
+            StartReceive6LoWPAN();
+            radioStrs();
             // Tulostetaan vastaanotettu viesti konsoli-ikkunaan
-                sprintf(tulosteluStr,"%s -radio\r\n",radioBuffer);
-                System_printf(tulosteluStr);
-                System_flush();
-                memset(tulosteluStr,0,100);
+//                sprintf(tulosteluStr,"%s -radio\r\n",radioBuffer);
+//                System_printf(tulosteluStr);
+//                System_flush();
+//                memset(tulosteluStr,0,100);
         }
         //jos tamagotchi on pidetty aiemmin tyytyvaisena ja taustajarjestelma lahettaa viestin etta se on karkaamassa
         // readMsg palauttaa 1 -> survive=True
