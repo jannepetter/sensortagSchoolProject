@@ -1,3 +1,9 @@
+/*Tekijät:
+ * Taneli Lohi      52963108 (pepin myota vaihtu, vanha: 2558385)
+ * Janne Uutela     1625303
+ * Saara Laasonen   2686040
+ */
+
 /* C Standard library */
 #include <aanet.h>
 #include <stdio.h>
@@ -49,7 +55,6 @@ Char uartTaskStack[STACKSIZE];
 Char mpuTaskStack[STACKSIZE];
 Char aaniTaskStack[SMALLSTACKSIZE];
 Char analyseDataTaskStack[STACKSIZE];
-Char displayTaskStack[STACKSIZE];
 
 uint8_t isHappy=0;      //jos tamagotchi happy -> niin se voi pysya hallussa yhden laiminlyonnin verran
 uint8_t survive=0;      //survive toiminnallisuuden ja viestin triggeri flagi
