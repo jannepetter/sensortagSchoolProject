@@ -88,17 +88,9 @@ int vasemmallaKyljella(int i) {
 };
 
 int jump(int i){
-
-//    if (liftZ(i) && preserveXY(i) && preserveTilt(i) &&
-//            restAccGyro(sIndx(i+3))){
-//
-//        return 1;
-//    }
-    //vähän muokkasin ja herkistelin tätä hyppyfunktiota
     if (liftZ2(i) && preserveXY2(i)){
-           return 1;
-       }
-
+        return 1;
+    }
     return 0;
 }
 //kiihtyvyys poikkeaa -1G:stä (maan vetovoima) mutta ei kuitenkaan ole positiivinen (esim. katollaan)
@@ -113,41 +105,5 @@ int preserveXY2(int i){
     }
     return 0;
 }
-
-//int liftZ(int i){
-//    if ((accz[i] > -0.8 && accz[i] < 0) || (accz[i] < -1.2 && accz[i] > -1.8)){return 1;}
-//    return 0;
-//}
-//int preserveXY(int i){
-//    float uthX = 0.6; // threshold for movement in x and y direction
-//    float lthX = -0.6;
-//    float thY = 0.2;
-//    if ((accx[i] > lthX && accx[i] < uthX) && (accy[i] > -thY && accy[i] < thY)){
-//        return 1;
-//    }
-//    return 0;
-//}
-//int preserveTilt(int i){
-//    float gxTh = 50.0;
-//    float gyTh = 150.0;
-//    float gzTh = 50.0;
-//
-//    if((gyrox[i] < gxTh && gyrox[i] > -gxTh) && (gyroy[i] < gyTh && gyroy[i] > -gyTh) &&
-//            (gyrox[i] < gzTh && gyrox[i] > -gzTh)){
-//        return 1;
-//    }
-//    return 0;
-//}
-//int restAccGyro(int i){
-//    float accRest = 0.1;
-//    float gyroRest = 20;
-//
-//    if ((accx[i] < accRest && accx[i] > -accRest) && (accy[i] < accRest && accy[i] > -accRest)
-//            && (accz[i] < -1+accRest && accz[i] > -1-accRest) && (gyrox[i] < gyroRest && gyrox[i] > -gyroRest)
-//            && (gyroy[i] < gyroRest && gyroy[i] > -gyroRest) && (gyroy[i] < gyroRest && gyroy[i] > -gyroRest)){
-//        return 1;
-//    }
-//    return 0;
-//}
 
 #endif

@@ -49,6 +49,7 @@ Char uartTaskStack[STACKSIZE];
 Char mpuTaskStack[STACKSIZE];
 Char aaniTaskStack[SMALLSTACKSIZE];
 Char analyseDataTaskStack[STACKSIZE];
+Char displayTaskStack[STACKSIZE];
 
 uint8_t isHappy=0;      //jos tamagotchi happy -> niin se voi pysya hallussa yhden laiminlyonnin verran
 uint8_t survive=0;      //survive toiminnallisuuden ja viestin triggeri flagi
@@ -142,15 +143,6 @@ void buttonFxn(PIN_Handle handle, PIN_Id pinId) {
         aaniState=ONEBEEP;
         }
     }
-//    uint_t pinValue = PIN_getOutputValue( Board_LED0 );
-//    pinValue = !pinValue;
-
-      //virtojen katkaisu/pÃ¤Ã¤llelaitto (ei toimi, patterit nÃ¤yttÃ¤is loppuneen -> johtuisko siitÃ¤?)
-//    Task_sleep(100000 / Clock_tickPeriod);
-//    PIN_close(buttonHandle);
-//    PINCC26XX_setWakeup(buttonWakeConfig);
-//    Power_shutdown(NULL,0);
-
 }
 
 //kommunikointi Gateway(defaulttina) 1piippaus - Radio 2 piippausta - Liiketunnistus seis 3 piippausta
@@ -410,6 +402,8 @@ Void uartTaskFxn(UArg arg0, UArg arg1) {
         Task_sleep(1000000 / Clock_tickPeriod); //1 sekunti
     }
 }
+// Taskifunktio
+
 
 Void sensorTaskFxn(UArg arg0, UArg arg1) {
     //alaledi paalle
@@ -507,11 +501,6 @@ Void sensorTaskFxn(UArg arg0, UArg arg1) {
         }
         sensorCounter++;
 
-//        uint32_t patteri = HWREG(AON_BATMON_BASE + AON_BATMON_O_BAT); //patterin jannite binaarilukuna (nollaa nayttaa)
-//        sprintf(tulosteluStr,"%f patteri\r", patteri);
-//        System_printf(tulosteluStr);
-//        System_flush();
-
         Task_sleep(150000 / Clock_tickPeriod);                      //0,15 s  eli datan kerays 6 kertaa sekunnissa
     }
 }
@@ -559,7 +548,6 @@ Int main(void) {
     if (PIN_registerIntCb(rightButtonHandle, &rightButtonFxn) != 0) {
             System_abort("Error registering right button callback function");
     }
-
     //sensoreitten lukeminen globaaleihin muuttujiin
     Task_Params_init(&sensorTaskParams);
     sensorTaskParams.stackSize = STACKSIZE;
