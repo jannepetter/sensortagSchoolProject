@@ -1,8 +1,3 @@
-/*Tekijät:
- * Taneli Lohi      52963108 (pepin myota vaihtu, vanha: 2558385)
- * Janne Uutela     1625303
- * Saara Laasonen   2686040
- */
 
 /* C Standard library */
 #include <aanet.h>
